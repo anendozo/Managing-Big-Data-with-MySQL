@@ -1,0 +1,110 @@
+#EXERCISE 1
+SELECT sku, retail,cost, COUNT(sku)
+FROM skstinfo
+GROUP BY sku, retail, cost
+HAVING sku =9217525;
+
+SELECT sku, COUNT(sku), AVG(retail), AVG(cost) 
+FROM skstinfo
+GROUP BY sku
+HAVING sku =9217525;
+
+#common to pairs of tables
+SELECT COUNT(DISTINCT skui.sku)
+FROM skuinfo skui LEFT JOIN skstinfo skst
+ON skui.sku=skst.sku; 
+
+
+#unique to specific table
+SELECT skui.sku, skst.sku
+FROM skuinfo skui LEFT JOIN skstinfo skst
+ON skui.sku=skst.sku 
+WHERE skst.sku IS NULL
+GROUP BY skui.sku, skst.sku;
+
+#b
+SELECT COUNT(skstinfo.sku)
+FROM skstinfo JOIN trnsact
+ON skstinfo.sku=trnsact.sku AND skstinfo.store=trnsact.store;
+
+#EXERCISE 2
+SELECT COUNT(DISTINCT store)
+FROM strinfo;
+
+SELECT COUNT(DISTINCT store)
+FROM store_msa;
+
+SELECT COUNT(DISTINCT store)
+FROM skstinfo;
+
+SELECT COUNT(DISTINCT store)
+FROM trnsact;
+
+#common to all four, very long
+
+SELECT COUNT(strinfo.store)
+FROM strinfo 
+JOIN store_msa ON strinfo.store= store_msa.store
+JOIN skstinfo ON store_msa.store= skstinfo.store
+JOIN trnsact ON skstinfo.store= trnsact.store;
+
+#Exercise 3
+SELECT *
+FROM trnsact LEFT JOIN skstinfo
+ON trnsact.sku = skstinfo.sku
+WHERE skstinfo.sku IS NULL;
+
+#Exercise 4
+SELECT trnsact.register, SUM(trnsact.amt -(skstinfo.cost * trnsact.quantity))/COUNT(DISTINCT trnsact.saledate) AS AvgSales
+FROM skstinfo JOIN trnsact
+ON skstinfo.sku =trnsact.sku AND skstinfo.store= trnsact.store
+WHERE trnsact.register=640 AND stype='P'
+GROUP BY trnsact.register;
+
+#EXERCISE 5
+
+SELECT TOP 1 saledate, MAX(amt)
+FROM trnsact
+WHERE stype='R'
+GROUP BY saledate;
+
+SELECT TOP 1 saledate, MAX(quantity)
+FROM trnsact
+WHERE stype='R'
+GROUP BY saledate;
+
+#EXERCISE 6
+SELECT MAX(amt), MIN(amt)
+FROM trnsact
+WHERE stype='P';
+
+#EXERCISE 7 no of brands
+SELECT skuinfo.dept,COUNT(DISTINCT skuinfo.brand) AS NoOfBrands, deptinfo.deptdesc
+FROM skuinfo JOIN deptinfo
+ON skuinfo.dept= deptinfo.dept
+GROUP BY skuinfo.dept, deptinfo.deptdesc
+HAVING NoOfBrands >100;
+
+#EXERCISE 8
+SELECT skstinfo.sku, skuinfo.dept AS Sdept, deptinfo.deptdesc
+FROM skstinfo LEFT JOIN skuinfo ON skstinfo.sku= skuinfo.sku
+JOIN deptinfo ON skuinfo.dept = deptinfo.dept
+GROUP BY skstinfo.sku, sdept, deptdesc
+HAVING skstinfo.sku= 5020024;
+
+#EXERCISE 9
+SELECT deptinfo.dept, deptinfo.deptdesc, skuinfo.brand, skuinfo.style, skuinfo.color,SUM(trnsact.amt)
+FROM skuinfo JOIN deptinfo ON skuinfo.dept =deptinfo.dept
+JOIN trnsact ON skuinfo.sku= trnsact.sku
+WHERE stype='R'
+GROUP BY deptinfo.dept, deptinfo.deptdesc, skuinfo.brand, skuinfo.style, skuinfo.color
+ORDER BY SUM(trnsact.amt) DESC;
+
+#EXERCISE 10
+SELECT strinfo.store, strinfo.state, strinfo.city, strinfo.zip, SUM(trnsact.sprice), SUM(trnsact.amt)
+FROM strinfo JOIN trnsact 
+ON strinfo.store=trnsact.store
+WHERE stype='P'
+GROUP BY strinfo.store, strinfo.state,strinfo.city, strinfo.zip
+ORDER BY SUM(trnsact.amt) DESC;
+
